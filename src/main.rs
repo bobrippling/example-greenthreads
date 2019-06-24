@@ -150,25 +150,38 @@ pub fn yield_thread() {
 #[inline(never)]
 unsafe fn switch(old: *mut ThreadContext, new: *const ThreadContext) {
     asm!("
-        mov     %rsp, 0x00($0)
-        mov     %r15, 0x08($0)
-        mov     %r14, 0x10($0)
-        mov     %r13, 0x18($0)
-        mov     %r12, 0x20($0)
-        mov     %rbx, 0x28($0)
-        mov     %rbp, 0x30($0)
-   
-        mov     0x00($1), %rsp
-        mov     0x08($1), %r15
-        mov     0x10($1), %r14
-        mov     0x18($1), %r13
-        mov     0x20($1), %r12
-        mov     0x28($1), %rbx
-        mov     0x30($1), %rbp
+        mov     %rsp, $7
+        mov     %r15, $8
+        mov     %r14, $9
+        mov     %r13, $10
+        mov     %r12, $11
+        mov     %rbx, $12
+        mov     %rbp, $13
+
+        mov     $0, %rsp
+        mov     $1, %r15
+        mov     $2, %r14
+        mov     $3, %r13
+        mov     $4, %r12
+        mov     $5, %rbx
+        mov     $6, %rbp
         ret
         "
-    :
-    :"r"(old), "r"(new)
+    : "=m"((*old).rsp)
+    , "=m"((*old).r15)
+    , "=m"((*old).r14)
+    , "=m"((*old).r13)
+    , "=m"((*old).r12)
+    , "=m"((*old).rbx)
+    , "=m"((*old).rbp)
+
+    : "m"((*new).rsp)
+    , "m"((*new).r15)
+    , "m"((*new).r14)
+    , "m"((*new).r13)
+    , "m"((*new).r12)
+    , "m"((*new).rbx)
+    , "m"((*new).rbp)
     :
     : "volatile", "alignstack"
     );
